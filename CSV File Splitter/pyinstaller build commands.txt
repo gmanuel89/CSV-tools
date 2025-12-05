@@ -1,0 +1,2 @@
+## To be executed from the "CSV File Splitter" folder
+pyinstaller src/main_ui.py --name csv_file_splitter --clean --onefile
