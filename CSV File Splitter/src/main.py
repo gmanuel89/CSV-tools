@@ -154,20 +154,25 @@ def split_csv_file_into_chunks():
     # Read CSV input file
     progress_bar.setValue(30)
     progress_bar.setFormat('Reading input file... %p%')
-    input_csv_file_content = read_csv_file(input_csv_file_path, output_format=dict)
+    input_csv_file_content = read_csv_file(input_csv_file_path)
     # Split CSV input file content into chunks
-    progress_bar.setValue(50)
-    progress_bar.setFormat('Splitting input file... %p%')
-    input_csv_file_content_chunks = split_csv_file_content_into_chunks(input_csv_file_content, number_of_chunks, number_of_lines_per_chunk)
-    # Write all output files
-    for i in range (len(input_csv_file_content_chunks)):
-        progress_bar.setValue(50 + int((i+1)/len(input_csv_file_content_chunks)*50))
+    if input_csv_file_content is not None:
+        progress_bar.setValue(50)
         progress_bar.setFormat('Splitting input file... %p%')
-        output_file_name = working_directory + '/' + '(' + str(i+1) + ') ' + os.path.basename(input_csv_file_path)
-        write_csv_file(input_csv_file_content_chunks[i], output_file_name)
-    print('Done!')
-    progress_bar.setValue(100)
-    progress_bar.setFormat('Done! %p%')
+        input_csv_file_content_chunks = split_csv_file_content_into_chunks(input_csv_file_content, number_of_chunks, number_of_lines_per_chunk)
+        # Write all output files
+        for i in range (len(input_csv_file_content_chunks)):
+            progress_bar.setValue(50 + int((i+1)/len(input_csv_file_content_chunks)*50))
+            progress_bar.setFormat('Splitting input file... %p%')
+            output_file_name = working_directory + '/' + '(' + str(i+1) + ') ' + os.path.basename(input_csv_file_path)
+            write_csv_file(input_csv_file_content_chunks[i], output_file_name)
+        print('Done!')
+        progress_bar.setValue(100)
+        progress_bar.setFormat('Done! %p%')
+    else:
+        print('Done!')
+        progress_bar.setValue(100)
+        progress_bar.setFormat('File not split! %p%')
 
 ## RUN THE APPLICATION
 if __name__ == "__main__":
