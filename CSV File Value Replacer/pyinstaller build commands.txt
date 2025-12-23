@@ -1,0 +1,2 @@
+## To be executed from the "CSV File Value Replacer" folder
+pyinstaller src/main.py --name csv_file_value_replacer-ui --clean --onefile
