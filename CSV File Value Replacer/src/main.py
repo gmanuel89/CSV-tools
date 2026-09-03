@@ -4,6 +4,10 @@ import os
 import traceback
 from csv_value_replacer.csv_value_replacer import *
 
+## Initialise logger
+setup_logging('logging_config.json')
+app_logger = logging.getLogger(__name__)
+
 ## Initialise global variables
 global working_directory
 working_directory = os.getcwd()
@@ -118,13 +122,15 @@ def main():
 ## Replace values in CSV file
 def replace_values_in_csv_file():
     # Get values from GUI
+    app_logger.info('Fetching input CSV file content...')
     progress_bar.setValue(15)
     progress_bar.setFormat('Fetching input CSV file content... %p%')
-    input_csv_file_content = read_csv_file(input_csv_file_path, list)
+    input_csv_file_content = pandas.read_csv(input_csv_file_path)
+    app_logger.info('Fetching content of replacement map CSV file...')
     progress_bar.setValue(30)
     progress_bar.setFormat('Fetching content of replacement map CSV file... %p%')
-    csv_map_file_content = read_csv_file(csv_map_file_path, list)
-    if input_csv_file_content and csv_map_file_content:
+    csv_map_file_content = pandas.read_csv(csv_map_file_path)
+    if not input_csv_file_content.empty and not csv_map_file_content.empty:
         # Create the map
         progress_bar.setValue(45)
         progress_bar.setFormat('Generating replacement map for CSV file... %p%')
