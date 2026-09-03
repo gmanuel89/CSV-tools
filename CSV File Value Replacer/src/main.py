@@ -1,7 +1,8 @@
 ## Import packages
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QRadioButton, QListWidget, QGridLayout, QFileDialog, QLineEdit, QPushButton, QMessageBox, QProgressBar
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QComboBox, QGridLayout, QFileDialog, QPushButton, QMessageBox, QProgressBar
 import os
-import traceback
+import pandas
+from log_handling.log_handling import *
 from csv_value_replacer.csv_value_replacer import *
 
 ## Initialise logger
@@ -11,42 +12,47 @@ app_logger = logging.getLogger(__name__)
 ## Initialise global variables
 global working_directory
 working_directory = os.getcwd()
+global file_or_folder
+file_or_folder = 'File'
 global input_csv_file_path
-input_csv_file_path = 'Select the CSV file with values to be replaced'
+input_csv_file_path = 'Select the CSV file or folder with CSV files with values to be replaced'
 global csv_map_file_path
 csv_map_file_path = 'Select the CSV file with the "old"-"new" map for value replacement'
 
 
-## Where to locate input file
+## Where to locate input file or folder
 def set_input_csv_file_path():
+    global file_or_folder
+    global file_or_folder_combobox
     global working_directory
     global input_csv_file_path
     global input_file_path_label
-    global input_csv_file_name
-    filepath_options = QFileDialog.Option.DontUseNativeDialog
-    input_csv_file_path, _ = QFileDialog.getOpenFileName(window, 'Select the CSV file with values to be replaced', working_directory, 'CSV Files (*.csv)', options=filepath_options)
-    input_csv_file_name = os.path.basename(input_csv_file_path)
-    print('Input file: %s' %input_csv_file_path)
-    print('Input file name: %s' %input_csv_file_name)
+    file_or_folder = file_or_folder_combobox.currentText()
+    #filepath_options = QFileDialog.Option.DontUseNativeDialog
+    if str(file_or_folder).lower() == 'file':
+        input_csv_file_path, _ = QFileDialog.getOpenFileName(window, 'Select the CSV file with values to be replaced', working_directory, 'CSV Files (*.csv)')#, options=filepath_options)   
+    else:
+        input_csv_file_path = QFileDialog.getExistingDirectory(window, 'Select the folder containing the CSV files with values to be replaced', working_directory)#, options=filepath_options)
+    app_logger.info(f'Input file: {input_csv_file_path}')
     layout.removeWidget(input_file_path_label)
     input_file_path_label = QLabel(input_csv_file_path)
     input_file_path_label.setToolTip(input_csv_file_path)
     input_file_path_label.setFixedWidth(500)
-    layout.addWidget(input_file_path_label, 0, 1)
+    layout.addWidget(input_file_path_label, 1, 1)
 
 ## Where to locate input file
 def set_csv_map_file_path():
     global working_directory
     global csv_map_file_path
     global map_file_path_label
-    filepath_options = QFileDialog.Option.DontUseNativeDialog
-    csv_map_file_path, _ = QFileDialog.getOpenFileName(window, 'Select the CSV file with the "old"-"new" map for value replacement', working_directory, 'CSV Files (*.csv)', options=filepath_options)
-    print('Input file: %s' %csv_map_file_path)
+    #filepath_options = QFileDialog.Option.DontUseNativeDialog
+    csv_map_file_path, _ = QFileDialog.getOpenFileName(window, 'Select the CSV file with the "old"-"new" map for value replacement', working_directory, 'CSV Files (*.csv)')#, options=filepath_options)
+    app_logger.info(f'Input file: {csv_map_file_path}')
     layout.removeWidget(map_file_path_label)
     map_file_path_label = QLabel(csv_map_file_path)
     map_file_path_label.setToolTip(csv_map_file_path)
     map_file_path_label.setFixedWidth(500)
-    layout.addWidget(map_file_path_label, 1, 1)
+    layout.addWidget(map_file_path_label, 2, 1)
 
 ## Exit app
 def exit_app():
@@ -75,16 +81,27 @@ def main():
     layout.setVerticalSpacing(20)
 
     ## Widgets tied to global variables
+    # Combo box with list of choice between single file and folder
+    global file_or_folder
+    global file_or_folder_combobox
+    file_or_folder_label = QLabel('File or Folder?')
+    file_or_folder_label.setFixedSize(150, 15)
+    layout.addWidget(file_or_folder_label, 0, 0)
+    file_or_folder_combobox = QComboBox()
+    file_or_folder_combobox.addItems(['File', 'Folder'])
+    file_or_folder_combobox.setCurrentIndex(0) # select default value
+    layout.addWidget(file_or_folder_combobox, 0, 1)
+    
     # Input CSV file path
     global input_file_path_label
     global input_csv_file_path
     input_file_path_label = QLabel(input_csv_file_path)
     input_file_path_label.setToolTip(input_csv_file_path)
     input_file_path_label.setFixedWidth(500)
-    layout.addWidget(input_file_path_label, 0, 1)
+    layout.addWidget(input_file_path_label, 1, 1)
     set_input_file_path_button = QPushButton('Set input CSV file path')
     set_input_file_path_button.clicked.connect(set_input_csv_file_path)
-    layout.addWidget(set_input_file_path_button, 0, 0)
+    layout.addWidget(set_input_file_path_button, 1, 0)
     
     # Input CSV map file path
     global map_file_path_label
@@ -92,27 +109,27 @@ def main():
     map_file_path_label = QLabel(csv_map_file_path)
     map_file_path_label.setToolTip(csv_map_file_path)
     map_file_path_label.setFixedWidth(500)
-    layout.addWidget(map_file_path_label, 1, 1)
+    layout.addWidget(map_file_path_label, 2, 1)
     set_map_file_path_button = QPushButton('Set map CSV file path')
     set_map_file_path_button.clicked.connect(set_csv_map_file_path)
-    layout.addWidget(set_map_file_path_button, 1, 0)
+    layout.addWidget(set_map_file_path_button, 2, 0)
 
     # App logic button(s)
     replace_csv_values_button = QPushButton('Replace values in CSV file')
     replace_csv_values_button.clicked.connect(replace_values_in_csv_file)
-    layout.addWidget(replace_csv_values_button, 2, 0, 1, 2)
+    layout.addWidget(replace_csv_values_button, 3, 0, 1, 2)
 
     # Exit button
     exit_button = QPushButton('Exit')
     exit_button.clicked.connect(exit_app)
-    layout.addWidget(exit_button, 3, 0, 1, 2)
+    layout.addWidget(exit_button, 4, 0, 1, 2)
 
     # Progress bar
     global progress_bar
     progress_bar = QProgressBar()
     progress_bar.setValue(0)
     progress_bar.setFormat('%p%')
-    layout.addWidget(progress_bar, 4, 0, 1, 2)  
+    layout.addWidget(progress_bar, 5, 0, 1, 2)  
 
     # Build window
     window.setLayout(layout)
@@ -136,14 +153,15 @@ def replace_values_in_csv_file():
         progress_bar.setFormat('Generating replacement map for CSV file... %p%')
         mapping_dictionary_array = create_replacing_map(csv_map_file_content)
         # Generate the output
-        output_csv_file_content = replace_csv_values(input_csv_file_content, mapping_dictionary_array, add_new_column_if_match_is_missing=True)
+        output_csv_file_content = replace_csv_values(input_csv_file_content, mapping_dictionary_array)
         # Write output file
+        input_csv_file_name = os.path.basename(input_csv_file_path)
         write_csv_file(output_csv_file_content, input_csv_file_name.split('.csv')[0] + '_replaced.csv')
-        print('Done!')
+        app_logger.info('Done!')
         progress_bar.setValue(100)
         progress_bar.setFormat('Done! %p%')
     else:
-        print('Failure!')
+        app_logger.error('Failure! Input CSV file or replacing map not found!')
         progress_bar.setValue(100)
         progress_bar.setFormat('Failure! Input CSV file or replacing map not found! %p%')
 
