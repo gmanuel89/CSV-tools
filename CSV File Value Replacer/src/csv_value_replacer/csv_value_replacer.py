@@ -49,6 +49,7 @@ def replace_csv_values(input_dataframe: pandas.DataFrame, mapping_dictionary_arr
             # For each column...
             for col in input_dataframe.columns:
                 # Replace the cell values
+                app_logger.debug(f'Replacement taking place:\nColumn: {col}\nOld Value: {maprepl.get('old')}\nNew Value: {maprepl.get('new')}')
                 input_dataframe[col] = input_dataframe[col].replace(str(maprepl.get('old')), str(maprepl.get('new')))
         else:
             ## If there are columns specified
@@ -58,6 +59,7 @@ def replace_csv_values(input_dataframe: pandas.DataFrame, mapping_dictionary_arr
             for col in input_dataframe.columns:
                 if col in columns:
                     # Replace the cell values
+                    app_logger.debug(f'Replacement taking place:\nColumn: {col}\nOld Value: {maprepl.get('old')}\nNew Value: {maprepl.get('new')}')
                     input_dataframe[col] = input_dataframe[col].replace(str(maprepl.get('old')), str(maprepl.get('new')))
     # Return
     return input_dataframe
