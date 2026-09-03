@@ -1,10 +1,47 @@
 ## Import libraries
+import logging
+import pandas
 import csv
 import sys
 import os
 
+## Initialise logger
+app_logger = logging.getLogger(__name__)
+
 # Create a dictionary of "old"-"new" value couples from a CSV file content
-def create_replacing_map(input_csv_lines):
+def create_replacing_map(input_csv_lines: pandas.DataFrame):
+    # Determine the names of the "new", the "old" and the "column" columns
+    column_name_new_value = None
+    column_name_old_value = None
+    column_name_column_for_replacement = None
+    for col in input_csv_lines.columns:
+        if 'old' in col.lower():
+            column_name_old_value = col
+        elif 'new' in col.lower():
+            column_name_new_value = col
+        elif 'column' in col.lower():
+            column_name_column_for_replacement = col
+    # Build the list of dictionaries
+    mapping_dictionary_array = []
+    # If the "column" is not specified
+    if column_name_new_value is not None and column_name_old_value is not None and column_name_column_for_replacement is None:
+        for index, row in input_csv_lines.iterrows():
+            mapping_dictionary = {'old' : row[column_name_old_value], 'new' : row[column_name_new_value]}
+            mapping_dictionary_array.append(mapping_dictionary)
+    # If the "column" is specified
+    elif column_name_new_value is not None and column_name_old_value is not None and column_name_column_for_replacement is not None:
+        for index, row in input_csv_lines.iterrows():
+            # retrieve the individual column names (stripped from spaces)
+            column_names = row[column_name_column_for_replacement].split(',') if (not pandas.isna(row[column_name_column_for_replacement]) and not pandas.isnull(row[column_name_column_for_replacement])) else []
+            for c in range(len(column_names)):
+                column_names[c] = column_names[c].strip()
+            mapping_dictionary = {'old' : row[column_name_old_value], 'new' : row[column_name_new_value], 'columns' : column_names}
+            mapping_dictionary_array.append(mapping_dictionary)
+    # Return
+    return mapping_dictionary_array
+
+# Create a dictionary of "old"-"new" value couples from a CSV file content
+def create_replacing_map2(input_csv_lines: list[list]):
     # Get header
     csv_header = input_csv_lines[0]
     # Remove it from the list
