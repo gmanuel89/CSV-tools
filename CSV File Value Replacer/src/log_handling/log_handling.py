@@ -126,9 +126,10 @@ LOGGING_CONFIG_JSON = {
       "class": "logging.handlers.RotatingFileHandler",
       "level": "DEBUG",
       "formatter": "standard",
-      "maxBytes": 10485760,
-      "backupCount": 500,
-      "filename": "app.log"
+      "maxBytes": 100 * 1024 * 1024,
+      "backupCount": 20,
+      "filename": "app.log",
+      "encoding": 'utf-8'
     }
   },
 
