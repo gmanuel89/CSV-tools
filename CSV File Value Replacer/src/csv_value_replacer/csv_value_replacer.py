@@ -46,6 +46,45 @@ def replace_csv_values(input_dataframe: pandas.DataFrame, mapping_dictionary_arr
     for maprepl in mapping_dictionary_array:
         ## If there is no column(s) specified, go for the all-cell replacement
         if not maprepl.get('columns'):
+            # For each row...
+            for index, row in input_dataframe.iterrows():
+                # For each column...
+                for col in input_dataframe.columns:
+                    # Replace the cell values
+                    if row[col] == str(maprepl.get('old')):
+                        app_logger.info(
+                        f"Row {row.name}, Column '{col}': "
+                        f"'{row[col]}' → '{str(maprepl.get('new'))}'"
+                        )
+                        app_logger.debug(f'Updating row:\n{row.to_dict()}')
+                        input_dataframe.at[row.name, col] = str(maprepl.get('new'))
+        else:
+            ## If there are columns specified
+            # Determine the indices of the columns (compare mapping with the header)
+            columns = maprepl.get('columns',[])
+            # For each row...
+            for index, row in input_dataframe.iterrows():
+                # For each column...
+                for col in input_dataframe.columns:
+                    if col in columns:
+                        # Replace the cell values
+                        if row[col] == str(maprepl.get('old')):
+                            app_logger.info(
+                            f"Row {row.name}, Column '{col}': "
+                            f"'{row[col]}' → '{str(maprepl.get('new'))}'"
+                            )
+                            input_dataframe.at[row.name, col] = str(maprepl.get('new'))
+    # Return
+    return input_dataframe
+
+## Replace the csv values according to a list of dictionaries with 'old' and 'new' values
+def replace_csv_values2(input_dataframe: pandas.DataFrame, mapping_dictionary_array: list[dict]) -> pandas.DataFrame:
+    ## Run if there is a map (otherwise return the input file with no modifications)
+    if len(mapping_dictionary_array) == 0: return input_dataframe
+    ## Scroll the replacing map items...
+    for maprepl in mapping_dictionary_array:
+        ## If there is no column(s) specified, go for the all-cell replacement
+        if not maprepl.get('columns'):
             # For each column...
             for col in input_dataframe.columns:
                 # Replace the cell values
