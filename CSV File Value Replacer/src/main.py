@@ -1,5 +1,5 @@
 ## Import packages
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QComboBox, QGridLayout, QFileDialog, QPushButton, QMessageBox, QProgressBar
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QComboBox, QPlainTextEdit, QGridLayout, QFileDialog, QPushButton, QMessageBox, QProgressBar
 import os
 import pandas
 from log_handling.log_handling import *
@@ -18,6 +18,8 @@ global input_csv_file_path
 input_csv_file_path = 'Select the CSV file or folder with CSV files with values to be replaced'
 global csv_map_file_path
 csv_map_file_path = 'Select the CSV file with the "old"-"new" map for value replacement'
+global columns_to_print_in_log
+columns_to_print_in_log = []
 
 
 ## Where to locate input file or folder
@@ -115,22 +117,31 @@ def main():
     set_map_file_path_button.clicked.connect(set_csv_map_file_path)
     layout.addWidget(set_map_file_path_button, 2, 0)
 
+    # Input CSV map file path
+    global columns_to_print_in_log
+    global columns_to_print_in_log_textbox
+    columns_to_print_in_log_label = QLabel('Columns to print in logs')
+    layout.addWidget(columns_to_print_in_log_label, 3, 0)
+    columns_to_print_in_log_textbox = QPlainTextEdit()
+    columns_to_print_in_log_textbox.setPlaceholderText('Insert columns to print in logs\n(one under the other)')
+    layout.addWidget(columns_to_print_in_log_textbox, 3, 1)
+
     # App logic button(s)
     replace_csv_values_button = QPushButton('Replace values in CSV file')
     replace_csv_values_button.clicked.connect(replace_values_in_csv_file)
-    layout.addWidget(replace_csv_values_button, 3, 0, 1, 2)
+    layout.addWidget(replace_csv_values_button, 4, 0, 1, 2)
 
     # Exit button
     exit_button = QPushButton('Exit')
     exit_button.clicked.connect(exit_app)
-    layout.addWidget(exit_button, 4, 0, 1, 2)
+    layout.addWidget(exit_button, 5, 0, 1, 2)
 
     # Progress bar
     global progress_bar
     progress_bar = QProgressBar()
     progress_bar.setValue(0)
     progress_bar.setFormat('%p%')
-    layout.addWidget(progress_bar, 5, 0, 1, 2)  
+    layout.addWidget(progress_bar, 6, 0, 1, 2)  
 
     # Build window
     window.setLayout(layout)
@@ -145,7 +156,11 @@ def replace_values_in_csv_file():
     else:
         input_csv_file_path_list = [os.path.join(input_csv_file_path, file) for file in os.listdir(input_csv_file_path) if file.endswith('.csv') and os.path.isfile(os.path.join(input_csv_file_path, file))
 ]
+    # Get columns to print in logs
+    columns_to_print_in_log = columns_to_print_in_log_textbox.toPlainText().split('\n')
+    # For each CSV file...
     for input_csv_file in input_csv_file_path_list:
+        # Read the files...
         app_logger.info('Fetching input CSV file content...')
         progress_bar.setValue(15)
         progress_bar.setFormat('Fetching input CSV file content... %p%')
@@ -160,7 +175,7 @@ def replace_values_in_csv_file():
             progress_bar.setFormat('Generating replacement map for CSV file... %p%')
             mapping_dictionary_array = create_replacing_map(csv_map_file_content)
             # Generate the output
-            output_csv_file_content = replace_csv_values(input_csv_file_content, mapping_dictionary_array)
+            output_csv_file_content = replace_csv_values(input_csv_file_content, mapping_dictionary_array, columns_to_print_in_log)
             # Write output file
             input_csv_file_name = os.path.basename(input_csv_file)
             write_csv_file(output_csv_file_content, input_csv_file_name.split('.csv')[0] + '_replaced.csv')

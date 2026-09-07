@@ -39,7 +39,7 @@ def create_replacing_map(input_dataframe: pandas.DataFrame) -> list[dict]:
     return mapping_dictionary_array
 
 ## Replace the csv values according to a list of dictionaries with 'old' and 'new' values
-def replace_csv_values(input_dataframe: pandas.DataFrame, mapping_dictionary_array: list[dict]) -> pandas.DataFrame:
+def replace_csv_values(input_dataframe: pandas.DataFrame, mapping_dictionary_array: list[dict], columns_to_print_in_log=[]) -> pandas.DataFrame:
     ## Run if there is a map (otherwise return the input file with no modifications)
     if len(mapping_dictionary_array) == 0: return input_dataframe
     ## Scroll the replacing map items...
@@ -56,7 +56,14 @@ def replace_csv_values(input_dataframe: pandas.DataFrame, mapping_dictionary_arr
                         f"Row {row.name}, Column '{col}': "
                         f"'{row[col]}' → '{str(maprepl.get('new'))}'"
                         )
-                        app_logger.debug(f'Updating row:\n{row.to_dict()}')
+                        if columns_to_print_in_log:
+                            row_to_print = {}
+                            for c in columns_to_print_in_log:
+                                if c in row.to_dict().keys():
+                                    row_to_print[c] = row.to_dict().get(c)
+                        else:
+                            row_to_print = row.to_dict()
+                        app_logger.debug(f'Updating row:\n{row_to_print}')
                         input_dataframe.at[row.name, col] = str(maprepl.get('new'))
         else:
             ## If there are columns specified
