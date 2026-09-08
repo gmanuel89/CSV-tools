@@ -2,6 +2,7 @@
 import logging
 import pandas
 import traceback
+from constants.constants import *
 
 ## Initialise logger
 app_logger = logging.getLogger(__name__)
@@ -13,27 +14,22 @@ def create_replacing_map(input_dataframe: pandas.DataFrame) -> list[dict]:
     column_name_old_value = None
     column_name_column_for_replacement = None
     for col in input_dataframe.columns:
-        if 'old' in col.lower():
+        if REPLACEMENT_MAP_KEY_OLD in col.lower():
             column_name_old_value = col
-        elif 'new' in col.lower():
+        elif REPLACEMENT_MAP_KEY_NEW in col.lower():
             column_name_new_value = col
-        elif 'column' in col.lower():
+        elif REPLACEMENT_MAP_KEY_COLUMN in col.lower():
             column_name_column_for_replacement = col
     # Build the list of dictionaries
     mapping_dictionary_array = []
-    # If the "column" is not specified
-    if column_name_new_value is not None and column_name_old_value is not None and column_name_column_for_replacement is None:
+    if column_name_new_value and column_name_old_value:
         for index, row in input_dataframe.iterrows():
-            mapping_dictionary = {'old' : row[column_name_old_value], 'new' : row[column_name_new_value]}
-            mapping_dictionary_array.append(mapping_dictionary)
-    # If the "column" is specified
-    elif column_name_new_value is not None and column_name_old_value is not None and column_name_column_for_replacement is not None:
-        for index, row in input_dataframe.iterrows():
-            # retrieve the individual column names (stripped from spaces)
-            column_names = row[column_name_column_for_replacement].split(',') if (not pandas.isna(row[column_name_column_for_replacement]) and not pandas.isnull(row[column_name_column_for_replacement])) else []
-            for c in range(len(column_names)):
-                column_names[c] = column_names[c].strip()
-            mapping_dictionary = {'old' : row[column_name_old_value], 'new' : row[column_name_new_value], 'columns' : column_names}
+            mapping_dictionary = {REPLACEMENT_MAP_KEY_OLD : row[column_name_old_value], REPLACEMENT_MAP_KEY_NEW : row[column_name_new_value]}
+            # If the "column" is specified
+            if column_name_column_for_replacement:
+                column_name = row[column_name_column_for_replacement]
+                mapping_dictionary[REPLACEMENT_MAP_KEY_COLUMN] = column_name
+            # Add the mapping to the array of mappings
             mapping_dictionary_array.append(mapping_dictionary)
     # Return
     return mapping_dictionary_array
@@ -48,9 +44,9 @@ def replace_csv_values(input_dataframe: pandas.DataFrame, mapping_dictionary_arr
     # Scroll the replacing map items...
     for maprepl in mapping_dictionary_array:
         # Get replacement information
-        columns_for_replacements = maprepl.get('columns', [])
-        old_value = maprepl.get('old')
-        new_value = maprepl.get('new')
+        columns_for_replacements = maprepl.get(REPLACEMENT_MAP_KEY_COLUMN, [])
+        old_value = maprepl.get(REPLACEMENT_MAP_KEY_OLD)
+        new_value = maprepl.get(REPLACEMENT_MAP_KEY_NEW)
         # For each row of the DataFrame...
         for index, row in input_dataframe.iterrows():
             # Store values for logging
