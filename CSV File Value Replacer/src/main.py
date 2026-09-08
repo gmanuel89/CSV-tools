@@ -154,38 +154,44 @@ def replace_values_in_csv_file():
     if file_or_folder.lower() == 'file':
         input_csv_file_path_list = [input_csv_file_path]
     else:
-        input_csv_file_path_list = [os.path.join(input_csv_file_path, file) for file in os.listdir(input_csv_file_path) if file.endswith('.csv') and os.path.isfile(os.path.join(input_csv_file_path, file))
-]
+        input_csv_file_path_list = [os.path.join(input_csv_file_path, file) for file in os.listdir(input_csv_file_path) if file.endswith('.csv') and os.path.isfile(os.path.join(input_csv_file_path, file))]
     # Get columns to print in logs
     columns_to_print_in_log = columns_to_print_in_log_textbox.toPlainText().split('\n')
-    # For each CSV file...
-    for input_csv_file in input_csv_file_path_list:
-        # Read the files...
-        app_logger.info('Fetching input CSV file content...')
-        progress_bar.setValue(15)
-        progress_bar.setFormat('Fetching input CSV file content... %p%')
-        input_csv_file_content = pandas.read_csv(input_csv_file)
-        app_logger.info('Fetching content of replacement map CSV file...')
-        progress_bar.setValue(30)
-        progress_bar.setFormat('Fetching content of replacement map CSV file... %p%')
-        csv_map_file_content = pandas.read_csv(csv_map_file_path)
-        if not input_csv_file_content.empty and not csv_map_file_content.empty:
-            # Create the map
-            progress_bar.setValue(45)
-            progress_bar.setFormat('Generating replacement map for CSV file... %p%')
-            mapping_dictionary_array = create_replacing_map(csv_map_file_content)
-            # Generate the output
-            output_csv_file_content = replace_csv_values(input_csv_file_content, mapping_dictionary_array, columns_to_print_in_log)
-            # Write output file
-            input_csv_file_name = os.path.basename(input_csv_file)
-            write_csv_file(output_csv_file_content, input_csv_file_name.split('.csv')[0] + '_replaced.csv')
-            app_logger.info('Done!')
-            progress_bar.setValue(100)
-            progress_bar.setFormat('Done! %p%')
-        else:
-            app_logger.error('Failure! Input CSV file or replacing map not found!')
-            progress_bar.setValue(100)
-            progress_bar.setFormat('Failure! Input CSV file or replacing map not found! %p%')
+    # Get the replacement map file
+    app_logger.info(f'Fetching content of replacement map CSV file ({csv_map_file_path})...')
+    progress_bar.setValue(10)
+    progress_bar.setFormat('Fetching content of replacement map CSV file... %p%')
+    csv_map_file_content = pandas.read_csv(csv_map_file_path)
+    # Proceed only if the Map is not empty
+    if not csv_map_file_content.empty:
+        # For each CSV file...
+        for input_csv_file in input_csv_file_path_list:
+            # Read the files...
+            app_logger.info(f'Fetching input CSV file content ({input_csv_file})...')
+            progress_bar.setValue(round(20/len(input_csv_file_path_list)+10))
+            progress_bar.setFormat('Fetching input CSV file content... %p%')
+            input_csv_file_content = pandas.read_csv(input_csv_file)
+            if not input_csv_file_content.empty:
+                # Create the map
+                progress_bar.setValue(round(50/len(input_csv_file_path_list)+10))
+                progress_bar.setFormat('Generating replacement map for CSV file... %p%')
+                mapping_dictionary_array = create_replacing_map(csv_map_file_content)
+                # Generate the output
+                output_csv_file_content = replace_csv_values(input_csv_file_content, mapping_dictionary_array, columns_to_print_in_log)
+                # Write output file
+                input_csv_file_name = os.path.basename(input_csv_file)
+                write_csv_file(output_csv_file_content, input_csv_file_name.split('.csv')[0] + '_replaced.csv')
+                app_logger.info('Done!')
+                progress_bar.setValue(round(90/len(input_csv_file_path_list)+10))
+                progress_bar.setFormat('Done! %p%')
+            else:
+                app_logger.error('Failure! Input CSV file not found or empty!')
+        progress_bar.setValue(100)
+        progress_bar.setFormat('Done! %p%')
+    else:
+        app_logger.error('Failure! Replacing map not found!')
+        progress_bar.setValue(100)
+        progress_bar.setFormat('Failure! Replacing map not found! %p%')
 
 ## RUN THE APPLICATION
 if __name__ == "__main__":
