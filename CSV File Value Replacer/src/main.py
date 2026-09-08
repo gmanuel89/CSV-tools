@@ -2,6 +2,7 @@
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QComboBox, QPlainTextEdit, QGridLayout, QFileDialog, QPushButton, QMessageBox, QProgressBar
 import os
 import pandas
+from constants.constants import *
 from log_handling.log_handling import *
 from csv_value_replacer.csv_value_replacer import *
 
@@ -180,7 +181,7 @@ def replace_values_in_csv_file():
                 output_csv_file_content = replace_csv_values(input_csv_file_content, mapping_dictionary_array, columns_to_print_in_log)
                 # Write output file
                 input_csv_file_name = os.path.basename(input_csv_file)
-                output_file_name = input_csv_file_name.split('.csv')[0] + '_replaced.csv'
+                output_file_name = f'{input_csv_file_name.split('.csv')[0]}{OUTPUT_FILE_SUFFIX}.csv'
                 app_logger.info(f'Writing output CSV file ({output_file_name})...')
                 output_file_written = write_csv_file(output_csv_file_content, output_file_name)
                 if output_file_written:
