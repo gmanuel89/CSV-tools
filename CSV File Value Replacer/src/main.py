@@ -180,7 +180,13 @@ def replace_values_in_csv_file():
                 output_csv_file_content = replace_csv_values(input_csv_file_content, mapping_dictionary_array, columns_to_print_in_log)
                 # Write output file
                 input_csv_file_name = os.path.basename(input_csv_file)
-                write_csv_file(output_csv_file_content, input_csv_file_name.split('.csv')[0] + '_replaced.csv')
+                output_file_name = input_csv_file_name.split('.csv')[0] + '_replaced.csv'
+                app_logger.info(f'Writing output CSV file ({output_file_name})...')
+                output_file_written = write_csv_file(output_csv_file_content, output_file_name)
+                if output_file_written:
+                    app_logger.info('Output CSV file saved successfully!')
+                else:
+                    app_logger.error('Failed to write CSV file!')
                 app_logger.info('Done!')
                 progress_bar.setValue(round(90/len(input_csv_file_path_list)+10))
                 progress_bar.setFormat('Done! %p%')
