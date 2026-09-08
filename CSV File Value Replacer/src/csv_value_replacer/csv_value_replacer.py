@@ -44,7 +44,7 @@ def replace_csv_values(input_dataframe: pandas.DataFrame, mapping_dictionary_arr
     if len(mapping_dictionary_array) == 0:
         app_logger.warning('No replacement will occur!')
         return input_dataframe
-    app_logger.debug('Replacing values in CSV file...')
+    app_logger.info('Replacing values in CSV file...')
     # Scroll the replacing map items...
     for maprepl in mapping_dictionary_array:
         # Get replacement information
@@ -63,7 +63,7 @@ def replace_csv_values(input_dataframe: pandas.DataFrame, mapping_dictionary_arr
                 for col in input_dataframe.columns:
                     # Replace the cell values
                     if row[col] == old_value:
-                        app_logger.debug(f"Row {row.name}, Column '{col}': '{row[col]}' → '{new_value}'")
+                        #app_logger.debug(f"Row {row.name}, Column '{col}': '{row[col]}' → '{new_value}'")
                         # Update the original DataFrame
                         input_dataframe.at[row.name, col] = new_value
                         # Store the row change for logging
@@ -76,7 +76,7 @@ def replace_csv_values(input_dataframe: pandas.DataFrame, mapping_dictionary_arr
                     if col in columns_for_replacements:
                         # Replace the cell values
                         if row[col] == old_value:
-                            app_logger.debug(f"Row {row.name}, Column '{col}': '{row[col]}' → '{new_value}'")
+                            #app_logger.debug(f"Row {row.name}, Column '{col}': '{row[col]}' → '{new_value}'")
                             # Update the original DataFrame
                             input_dataframe.at[row.name, col] = new_value
                             # Store the row change for logging
