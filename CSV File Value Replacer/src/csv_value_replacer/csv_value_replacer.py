@@ -44,7 +44,7 @@ def replace_csv_values(input_dataframe: pandas.DataFrame, mapping_dictionary_arr
     # Scroll the replacing map items...
     for maprepl in mapping_dictionary_array:
         # Get replacement information
-        columns_for_replacements = maprepl.get(REPLACEMENT_MAP_KEY_COLUMN, [])
+        column_for_replacement = maprepl.get(REPLACEMENT_MAP_KEY_COLUMN)
         old_value = maprepl.get(REPLACEMENT_MAP_KEY_OLD)
         new_value = maprepl.get(REPLACEMENT_MAP_KEY_NEW)
         # For each row of the DataFrame...
@@ -54,7 +54,7 @@ def replace_csv_values(input_dataframe: pandas.DataFrame, mapping_dictionary_arr
             row_old_value = row.copy()
             row_new_value = row.copy()
             # If there is no column(s) specified, go for the all-cell replacement
-            if not columns_for_replacements:
+            if not column_for_replacement:
                 # For each column...
                 for col in input_dataframe.columns:
                     # Replace the cell values
@@ -69,7 +69,7 @@ def replace_csv_values(input_dataframe: pandas.DataFrame, mapping_dictionary_arr
             else:
                 # For each column...
                 for col in input_dataframe.columns:
-                    if col in columns_for_replacements:
+                    if col == column_for_replacement:
                         # Replace the cell values
                         if row[col] == old_value:
                             #app_logger.debug(f"Row {row.name}, Column '{col}': '{row[col]}' → '{new_value}'")
