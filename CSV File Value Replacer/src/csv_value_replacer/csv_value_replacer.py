@@ -58,7 +58,7 @@ def replace_csv_values(input_dataframe: pandas.DataFrame, mapping_dictionary_arr
                 # For each column...
                 for col in input_dataframe.columns:
                     # Replace the cell values
-                    if row[col] == old_value:
+                    if row[col] == old_value or (pandas.isna(row[col]) and pandas.isna(old_value)):
                         #app_logger.debug(f"Row {row.name}, Column '{col}': '{row[col]}' → '{new_value}'")
                         # Update the original DataFrame
                         input_dataframe.at[row.name, col] = new_value
@@ -71,7 +71,7 @@ def replace_csv_values(input_dataframe: pandas.DataFrame, mapping_dictionary_arr
                 for col in input_dataframe.columns:
                     if col == column_for_replacement:
                         # Replace the cell values
-                        if row[col] == old_value:
+                        if row[col] == old_value or (pandas.isna(row[col]) and pandas.isna(old_value)):
                             #app_logger.debug(f"Row {row.name}, Column '{col}': '{row[col]}' → '{new_value}'")
                             # Update the original DataFrame
                             input_dataframe.at[row.name, col] = new_value
