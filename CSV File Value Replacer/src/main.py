@@ -162,7 +162,7 @@ def replace_values_in_csv_file():
     app_logger.info(f'Fetching content of replacement map CSV file ({csv_map_file_path})...')
     progress_bar.setValue(10)
     progress_bar.setFormat('Fetching content of replacement map CSV file... %p%')
-    csv_map_file_content = pandas.read_csv(csv_map_file_path)
+    csv_map_file_content = pandas.read_csv(csv_map_file_path, dtype=str)
     # Proceed only if the Map is not empty
     if not csv_map_file_content.empty:
         # For each CSV file...
@@ -171,7 +171,7 @@ def replace_values_in_csv_file():
             app_logger.info(f'Fetching input CSV file content ({input_csv_file})...')
             progress_bar.setValue(round(20/len(input_csv_file_path_list)+10))
             progress_bar.setFormat('Fetching input CSV file content... %p%')
-            input_csv_file_content = pandas.read_csv(input_csv_file)
+            input_csv_file_content = pandas.read_csv(input_csv_file, dtype=str)
             if not input_csv_file_content.empty:
                 # Create the map
                 progress_bar.setValue(round(50/len(input_csv_file_path_list)+10))
