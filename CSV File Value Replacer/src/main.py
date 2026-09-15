@@ -183,11 +183,12 @@ def replace_values_in_csv_file():
                 input_csv_file_name = os.path.basename(input_csv_file)
                 output_file_name = f'{input_csv_file_name.split('.csv')[0]}{OUTPUT_FILE_SUFFIX}.csv'
                 app_logger.info(f'Writing output CSV file ({output_file_name})...')
-                output_file_written = write_csv_file(output_csv_file_content, output_file_name)
-                if output_file_written:
+                try:
+                    output_csv_file_content.to_csv(output_file_name, index=False, encoding='utf-8-sig')
                     app_logger.info('Output CSV file saved successfully!')
-                else:
+                except:
                     app_logger.error('Failed to write CSV file!')
+                    app_logger.debug(traceback.format_exc())
                 app_logger.info('Done!')
                 progress_bar.setValue(round(90/len(input_csv_file_path_list)+10))
                 progress_bar.setFormat('Done! %p%')

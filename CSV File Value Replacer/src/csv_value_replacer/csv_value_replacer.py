@@ -124,35 +124,3 @@ def replace_csv_values2(input_dataframe: pandas.DataFrame, mapping_dictionary_ar
                     input_dataframe[col] = input_dataframe[col].replace(str(maprepl.get('old')), str(maprepl.get('new')))
     # Return
     return input_dataframe
-
-## Write CSV content (in form of dataframe) into a file
-def write_csv_file(csv_file_content: pandas.DataFrame, output_file_name: str, custom_column_ordering=[]) -> bool:
-    """Write CSV content (in form of dataframe) into a file"""
-    # Check output file name
-    if output_file_name == '' : output_file_name = 'CSV file'
-    if not output_file_name.endswith('.csv') : output_file_name = output_file_name + '.csv'
-    # Custom column ordering (sort the ones specified, add back all the rest)
-    csv_header = csv_file_content.columns.tolist()
-    if custom_column_ordering is not None and len(custom_column_ordering) > 0:
-        custom_csv_header = []
-        for cust_col in custom_column_ordering:
-            for col in csv_header:
-                if col == cust_col:
-                    custom_csv_header.append(col)
-                    break
-        for col in csv_header:
-            if col not in custom_column_ordering:
-                custom_csv_header.append(col)
-    else:
-        custom_csv_header = csv_header
-    # Get the custom column ordering  
-    csv_file_content = csv_file_content[custom_csv_header]
-    # Write file content
-    try:
-        csv_file_content.to_csv(output_file_name, index=False, encoding='utf-8-sig')
-        file_written = True
-    except:
-        file_written = False
-        app_logger.debug(traceback.format_exc())
-    # return
-    return file_written
