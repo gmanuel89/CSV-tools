@@ -154,7 +154,7 @@ def split_csv_file_into_chunks():
     # Read CSV input file
     progress_bar.setValue(30)
     progress_bar.setFormat('Reading input file... %p%')
-    input_csv_file_content = read_csv_file(input_csv_file_path)
+    input_csv_file_content = pandas.read_csv(input_csv_file_path, dtype=str)
     # Split CSV input file content into chunks
     if input_csv_file_content is not None:
         progress_bar.setValue(50)
@@ -165,7 +165,12 @@ def split_csv_file_into_chunks():
             progress_bar.setValue(50 + int((i+1)/len(input_csv_file_content_chunks)*50))
             progress_bar.setFormat('Splitting input file... %p%')
             output_file_name = working_directory + '/' + '(' + str(i+1) + ') ' + os.path.basename(input_csv_file_path)
-            write_csv_file(input_csv_file_content_chunks[i], output_file_name)
+            try:
+                input_csv_file_content_chunks[i].to_csv(output_file_name, index=False, encoding='utf-8-sig')
+                print('Output CSV file saved successfully!')
+            except:
+                print('Failed to write CSV file!')
+                print(traceback.format_exc())
         print('Done!')
         progress_bar.setValue(100)
         progress_bar.setFormat('Done! %p%')
