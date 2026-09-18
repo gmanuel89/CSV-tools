@@ -2,7 +2,12 @@
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QRadioButton, QListWidget, QGridLayout, QFileDialog, QLineEdit, QPushButton, QMessageBox, QProgressBar
 import os
 import traceback
+from log_handling.log_handling import *
 from csv_file_splitter.csv_file_splitter import *
+
+## Initialise logger
+setup_logging('logging_config.json')
+app_logger = logging.getLogger(__name__)
 
 ## Initialise global variables
 global working_directory
@@ -21,7 +26,7 @@ def set_file_path():
     global input_file_path_label
     filepath_options = QFileDialog.Option.DontUseNativeDialog
     input_csv_file_path, _ = QFileDialog.getOpenFileName(window, 'Select CSV file to split', working_directory, 'CSV Files (*.csv)', options=filepath_options)
-    print('Input file: %s' %input_csv_file_path)
+    app_logger.info('Input file: %s' %input_csv_file_path)
     layout.removeWidget(input_file_path_label)
     input_file_path_label = QLabel(input_csv_file_path)
     input_file_path_label.setToolTip(input_csv_file_path)
@@ -34,7 +39,7 @@ def set_working_directory():
     global working_directory_label
     filepath_options = QFileDialog.Option.DontUseNativeDialog.ShowDirsOnly
     working_directory = QFileDialog.getExistingDirectory(window, 'Select Working Directory', working_directory, options=filepath_options)
-    print('Output directory set to: %s' %working_directory)
+    app_logger.info('Output directory set to: %s' %working_directory)
     layout.removeWidget(working_directory_label)
     working_directory_label = QLabel(working_directory)
     working_directory_label.setToolTip(working_directory)
@@ -167,15 +172,15 @@ def split_csv_file_into_chunks():
             output_file_name = working_directory + '/' + '(' + str(i+1) + ') ' + os.path.basename(input_csv_file_path)
             try:
                 input_csv_file_content_chunks[i].to_csv(output_file_name, index=False, encoding='utf-8-sig')
-                print('Output CSV file saved successfully!')
+                app_logger.info('Output CSV file saved successfully!')
             except:
-                print('Failed to write CSV file!')
-                print(traceback.format_exc())
-        print('Done!')
+                app_logger.error('Failed to write CSV file!')
+                app_logger.debug(traceback.format_exc())
+        app_logger.info('Done!')
         progress_bar.setValue(100)
         progress_bar.setFormat('Done! %p%')
     else:
-        print('Done!')
+        app_logger.warning('File not split!')
         progress_bar.setValue(100)
         progress_bar.setFormat('File not split! %p%')
 
