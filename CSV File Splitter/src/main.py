@@ -1,5 +1,5 @@
 ## Import packages
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QRadioButton, QListWidget, QGridLayout, QFileDialog, QLineEdit, QPushButton, QMessageBox, QProgressBar
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QComboBox, QGridLayout, QFileDialog, QLineEdit, QPushButton, QMessageBox, QProgressBar
 import os
 import traceback
 from log_handling.log_handling import *
@@ -18,6 +18,8 @@ global number_of_output_chunks
 number_of_output_chunks = 2
 global number_of_lines_per_chunk
 number_of_lines_per_chunk = 10
+global split_modality
+split_modality = 'Chunks'
 
 ## Where to locate input file
 def set_file_path():
@@ -73,6 +75,17 @@ def main():
     layout.setVerticalSpacing(20)
 
     ## Widgets tied to global variables
+    # Combo box with list of choice between single file and folder
+    global split_modality
+    global split_modality_combobox
+    split_modality_label = QLabel('Chunks\nor\nLines per chunk?')
+    split_modality_label.setFixedSize(150, 50)
+    layout.addWidget(split_modality_label, 2, 0)
+    split_modality_combobox = QComboBox()
+    split_modality_combobox.addItems(['Chunks', 'Lines per chunk'])
+    split_modality_combobox.setCurrentIndex(0) # select default value
+    layout.addWidget(split_modality_combobox, 2, 1)
+    
     # File path
     global input_file_path_label
     global input_csv_file_path
@@ -95,29 +108,14 @@ def main():
     layout.addWidget(set_working_directory_button, 1, 0)
 
     # Number of chunks
-    global number_of_chunks_input_box
-    number_of_chunks_label = QLabel('Number of chunks')
-    number_of_chunks_label.setFixedSize(100, 30)
-    layout.addWidget(number_of_chunks_label, 2, 0)
-    number_of_chunks_input_box = QLineEdit()
-    number_of_chunks_input_box.setText('2')
-    number_of_chunks_input_box.setFixedSize(500, 30)
-    layout.addWidget(number_of_chunks_input_box, 2, 1)
-
-    # Or
-    number_of_chunks_or_lines_per_chunk_label = QLabel('Or')
-    number_of_chunks_or_lines_per_chunk_label.setFixedSize(100, 30)
-    layout.addWidget(number_of_chunks_or_lines_per_chunk_label, 3, 0, 1, 2)
-
-    # Number of lines per chunk
-    global number_of_lines_per_chunk_input_box
-    number_of_lines_per_chunk_label = QLabel('Number of lines per chunk')
-    number_of_lines_per_chunk_label.setFixedSize(100, 30)
-    layout.addWidget(number_of_lines_per_chunk_label, 4, 0)
-    number_of_lines_per_chunk_input_box = QLineEdit()
-    number_of_lines_per_chunk_input_box.setText('10')
-    number_of_lines_per_chunk_input_box.setFixedSize(500, 30)
-    layout.addWidget(number_of_lines_per_chunk_input_box, 4, 1)
+    global number_input_box
+    number_label = QLabel('Number of chunks\nor\nNumber of lines per chunk')
+    number_label.setFixedSize(150, 50)
+    layout.addWidget(number_label, 3, 0)
+    number_input_box = QLineEdit()
+    number_input_box.setText('2')
+    number_input_box.setFixedSize(500, 30)
+    layout.addWidget(number_input_box, 3, 1)
 
     # App logic button(s)
     generate_report_button = QPushButton('Split CSV file into chunks')
@@ -143,19 +141,23 @@ def main():
 
 ##
 def split_csv_file_into_chunks():
+    global split_modality
     # Get values from GUI
     progress_bar.setValue(10)
     progress_bar.setFormat('Getting split parameters... %p%')
-    number_of_lines_per_chunk = number_of_lines_per_chunk_input_box.text()
-    number_of_chunks = number_of_chunks_input_box.text()
-    try:
-        number_of_chunks = int(number_of_chunks)
-    except:
-        number_of_chunks = 2
-    try:
-        number_of_lines_per_chunk = int(number_of_lines_per_chunk)
-    except:
-        number_of_lines_per_chunk = 10
+    split_modality = split_modality_combobox.currentText()
+    if 'chunks' in split_modality.lower():
+        number_of_lines_per_chunk = None
+        try:
+            number_of_chunks = int(number_input_box.text())
+        except:
+            number_of_chunks = 2
+    else:
+        number_of_chunks = None
+        try:
+            number_of_lines_per_chunk = int(number_input_box.text())
+        except:
+            number_of_lines_per_chunk = 10
     # Read CSV input file
     progress_bar.setValue(30)
     progress_bar.setFormat('Reading input file... %p%')
